@@ -6,10 +6,36 @@
     <link rel="stylesheet" href="/stylesheets/application.css" type="text/css">
   </head>
   <body>
+       
     <p>Enter guess code(only digits from 1 to 6):</p>
-    <input type="guess_code" oninvalid="this.setCustomValidity('Error!')" oninput="this.setCustomValidity('')" pattern="[1-6]{4}"/>
-    <p><input type="submit" value="Отправить"></p>
-    asdsa : <%= @gg %>
+    <div class="start">
+            <form method="post" action="/game">
+              <input name="user_code" type="text"/>
+              <br>
+              <input type="submit" value="Enter"/>
+            </form>
+          </div> 
+    ___________________________________
+        
+        <br> user code is: <%= @guess_code %>
+        <br> secret code is: <%= @secret_code %>
+
+        <% if win? %>
+          <br>You win
+        <%end%> 
+    
+    
+    
+        
+        
+
+   
+
+      
+    
+    
+
+ 
     
   </body>
 </html>

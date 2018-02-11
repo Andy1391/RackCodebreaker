@@ -1,6 +1,6 @@
 module Codebreaker
 
-  class Game
+  class CodebreakerGame
 
     HINTS = 3
     CODE_SIZE = 4
@@ -10,27 +10,22 @@ module Codebreaker
     attr_accessor :secret_code, :user_code
     
     def initialize 
-      @secret_code = secret_code
+      @secret_code = Array.new(CODE_SIZE){rand(RANGE_NUMBER)}
       @user_code = user_code
       @hint = HINTS
-      @attempts = ATTEMPTS
-      
+      @attempts = ATTEMPTS      
     end
 
-    def new_game
+    def begin
       @secret_code = Array.new(CODE_SIZE){rand(RANGE_NUMBER)}
       # input_user_code
       # attempts
       # win?
     end   
 
-    def secret_code
-      @secret_code = Array.new(CODE_SIZE){rand(RANGE_NUMBER)}   
-    end 
-
     def input_user_code
       @user_code = []
-      ATTEMPTS.times     
+      # ATTEMPTS.times     
       # CODE_SIZE.times do
       # user_code << gets.chomp.to_i
       # end

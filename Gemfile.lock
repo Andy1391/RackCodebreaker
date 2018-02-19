@@ -9,6 +9,7 @@ GEM
     diff-lcs (1.3)
     json (2.1.0)
     rack (2.0.3)
+    redis (4.0.1)
     rspec (3.7.0)
       rspec-core (~> 3.7.0)
       rspec-expectations (~> 3.7.0)
@@ -30,6 +31,7 @@ DEPENDENCIES
   codebreaker!
   json
   rack
+  redis
   rspec
 
 BUNDLED WITH

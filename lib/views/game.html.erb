@@ -11,20 +11,23 @@
   <center>
 
         
-    <p>Enter guess code(only digits from 1 to 6):</p>
+    <p>Enter guess code(4 digits from 1 to 6):</p>
     <div class="start">
             <form method="post"  >
               <input name="user_code"  type="numbers" required pattern="[1-6]{4}" placeholder = "* * * *"/>
               <input type="submit" value="Enter"/>
             </form>
           </div> 
-    _____________<%start %>______________________
+    _____________<% start %>______________________
       
         <br> user code is: <%= @guess_code %>
-        <br> secret code is: <%= @secret_code %>   
+        <br> secret code is: <%= @red %>   
             <br> test: <% save_code_to_file %>
-         <br> Code:<br> 
-                 <h3> <%= read_code_from_file %><h3/> 
+         <p>Code:</p> 
+                 <h3> <%= read_code_from_file %> </h3>
+
+           code <%= @cook %>
+
 
            
   </center>

@@ -1,12 +1,13 @@
 require 'codebreaker'
 require 'erb'
+require 'redis'
 require 'json'
 
 class Game
 
-  attr_reader :secret_code
-
   CODE_FILENAME = 'guess_code.json'
+  CODE_SIZE = 4
+  RANGE_NUMBER = 1..6
 
   def self.call(env)
     new(env).response.finish
@@ -17,11 +18,13 @@ class Game
     @current_user = nil    
     @gg = @request.cookies['current_user']
     @guess_code = Array.new
+    @cook = @request.cookies['secret_code']      
   end
 
   def response
     case @request.path
-    when '/' then render_view('index.html.erb')  
+    # when '/' then render_view('index.html.erb')
+    when '/' then generate_secret_code && render_view('index.html.erb') 
     when '/rules' then render_view('rules.html.erb')
     when '/game' then game
     when '/statistics' then render_view('statistics.html.erb')
@@ -32,11 +35,16 @@ class Game
 
   def start
     @game = Codebreaker::CodebreakerGame.new
-  end
+    @game.begin 
+  end 
 
-  def secret_code 
-    @game.begin    
-  end
+  def generate_secret_code
+    Rack::Response.new do |response|
+      code = Array.new(4){rand(1..6)}
+      response.set_cookie("secret_code", {:value => code, :path => "/", :expires => Time.now+24*60*60}) 
+    end
+    # return render_view('index.html.erb') 
+  end 
 
   def game
     @guess_code << @request.params['user_code'].to_i 
@@ -45,7 +53,7 @@ class Game
 
   def save_code_to_file    
     f = File.open(CODE_FILENAME, 'a') do |f|
-    f.write("#{@request.params['user_code']} \n <br>")   
+    f.write("#{@request.params['user_code']} \n ")   
     end
   end
 

@@ -1,6 +1,5 @@
 require 'codebreaker'
 require 'erb'
-require 'redis'
 require 'json'
 
 class Game
@@ -25,18 +24,23 @@ class Game
     case @request.path 
     when '/' then render_view('index.html.erb')  
     when '/rules' then render_view('rules.html.erb')    
-    when '/game' then game
+    when '/game' then guess_code
     when '/statistics' then render_view('statistics.html.erb')
     when '/game' then render_view('game.html.erb')
     else Rack::Response.new('Not Found', 404)
     end
   end
 
-  def start
+  def new_game
     @game = Codebreaker::CodebreakerGame.new
   end
 
   private
+
+  def start
+    save_code_to_file
+    read_code_from_file
+  end
 
   def random_code
     @secret_code = @cook.split('').map(&:to_i)
@@ -44,14 +48,14 @@ class Game
     @secret_code
   end   
 
-  def game
+  def guess_code
     @guess_code << @request.params['user_code'].to_i 
     return render_view('game.html.erb')
   end 
 
   def save_code_to_file    
     f = File.open(CODE_FILENAME, 'a') do |f|
-    f.write("#{@request.params['user_code']}" + "#{count_plus_and_minus}   <br>" )   
+    f.write("#{@request.params['user_code']}  " + "#{count_plus_and_minus}   <br>" )   
     end
   end
 
@@ -93,6 +97,15 @@ class Game
     count.join
   end
 
+  def generate_new_code    
+    @cook = false
+  end
+
+  def delete_current_game_data
+    generate_new_code
+    delete_code_file    
+  end
+
   def render_view(template)
     Rack::Response.new(render(template)) do |response|
       unless @gg
@@ -102,7 +115,7 @@ class Game
       end
       unless @cook
         code = Array.new(CODE_SIZE){rand(RANGE_NUMBER)}
-        response.set_cookie("secret_code", {:value => code, :path => "/", :expires => Time.now+24*60*60}) 
+        response.set_cookie("secret_code", {:value => code, :path => "/", :expires => Time.now+24*60*60})        
       end         
     end
   end

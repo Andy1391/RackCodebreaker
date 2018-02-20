@@ -26,12 +26,20 @@
          <p>Code:</p> 
                  <h3> <%= read_code_from_file %> </h3>
                  <%= random_code %>
-                
+
         
            
               <% if win? %>
               Congratulation you win!
-              <% delete_code_file %>
+              <%delete_current_game_data%>
+               
+               <br>Play again?
+                <form action="/game">
+               <button>Yes</button>
+                </form>
+               <form action="/">
+               <button >No</button>
+              </form>
               <% end %>
 
            

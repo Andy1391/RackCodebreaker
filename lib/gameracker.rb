@@ -18,14 +18,13 @@ class Game
     @current_user = nil    
     @gg = @request.cookies['current_user']
     @guess_code = Array.new
-    @cook = @request.cookies['secret_code']      
+    @cook = @request.cookies['secret_code']          
   end
 
   def response
-    case @request.path
-    # when '/' then render_view('index.html.erb')
-    when '/' then generate_secret_code && render_view('index.html.erb') 
-    when '/rules' then render_view('rules.html.erb')
+    case @request.path 
+    when '/' then render_view('index.html.erb')  
+    when '/rules' then render_view('rules.html.erb')    
     when '/game' then game
     when '/statistics' then render_view('statistics.html.erb')
     when '/game' then render_view('game.html.erb')
@@ -35,16 +34,15 @@ class Game
 
   def start
     @game = Codebreaker::CodebreakerGame.new
-    @game.begin 
-  end 
+  end
 
-  def generate_secret_code
-    Rack::Response.new do |response|
-      code = Array.new(4){rand(1..6)}
-      response.set_cookie("secret_code", {:value => code, :path => "/", :expires => Time.now+24*60*60}) 
-    end
-    # return render_view('index.html.erb') 
-  end 
+  private
+
+  def random_code
+    @secret_code = @cook.split('').map(&:to_i)
+    @secret_code.delete(0)
+    @secret_code
+  end   
 
   def game
     @guess_code << @request.params['user_code'].to_i 
@@ -53,7 +51,7 @@ class Game
 
   def save_code_to_file    
     f = File.open(CODE_FILENAME, 'a') do |f|
-    f.write("#{@request.params['user_code']} \n ")   
+    f.write("#{@request.params['user_code']}" + "#{count_plus_and_minus}   <br>" )   
     end
   end
 
@@ -66,15 +64,45 @@ class Game
   end
 
   def win?
-    @guess_code.join == @secret_code.join
+    @guess_code.join == random_code.join    
+  end  
+
+  def count_plus
+    plus = []
+      CODE_SIZE.times do |i| 
+        if @guess_code.join.each_char.to_a[i] == random_code.join.each_char.to_a[i]
+          plus << "+"
+        end
+      end
+    plus
+  end
+
+  def count_minus
+    minus = []
+      CODE_SIZE.times do |i|
+        if @guess_code.join.each_char.to_a.include?(random_code.join.each_char.to_a[i]) && @guess_code.join.each_char.to_a[i] != random_code.join.each_char.to_a[i]
+          minus << "-"
+        end
+      end
+    minus
+  end
+
+  def count_plus_and_minus
+    count = []
+    count << count_plus.concat(count_minus)
+    count.join
   end
 
   def render_view(template)
     Rack::Response.new(render(template)) do |response|
       unless @gg
-        o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
-        string = (0...50).map { o[rand(o.length)] }.join
+        token = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
+        string = (0...50).map { token[rand(token.length)] }.join
         response.set_cookie("current_user", {:value => string, :path => "/", :expires => Time.now+24*60*60})        
+      end
+      unless @cook
+        code = Array.new(CODE_SIZE){rand(RANGE_NUMBER)}
+        response.set_cookie("secret_code", {:value => code, :path => "/", :expires => Time.now+24*60*60}) 
       end         
     end
   end

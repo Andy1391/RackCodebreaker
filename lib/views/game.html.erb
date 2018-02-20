@@ -25,9 +25,14 @@
             <br> test: <% save_code_to_file %>
          <p>Code:</p> 
                  <h3> <%= read_code_from_file %> </h3>
-
-           code <%= @cook %>
-
+                 <%= random_code %>
+                
+        
+           
+              <% if win? %>
+              Congratulation you win!
+              <% delete_code_file %>
+              <% end %>
 
            
   </center>

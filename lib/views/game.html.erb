@@ -6,9 +6,10 @@
     <link rel="stylesheet" href="/stylesheets/application.css" type="text/css">
   </head>
   <body>
-
+ 
   <p><a href="/">Home page</a></p>   
   <center>
+ <%start%>
 
         
     <p>Enter guess code(4 digits from 1 to 6):</p>
@@ -17,21 +18,26 @@
               <input name="user_code"  type="numbers" required pattern="[1-6]{4}" placeholder = "* * * *"/>
               <input type="submit" value="Enter"/>
             </form>
-          </div> 
-    _____________<% start %>______________________
+    </div> 
+    ___________________________________
       
-        <br> user code is: <%= @guess_code %>
-        <br> secret code is: <%= @red %>   
-            <br> test: <% save_code_to_file %>
-         <p>Code:</p> 
-                 <h3> <%= read_code_from_file %> </h3>
-                 <%= random_code %>
-
+        <br> user code is: <%= @guess_code %>       
+   <h3><p text align="left">attempts  <%= @attempts %></p></h3>
+          
+        
+                <div class="user_code">  <%= read_code_from_file %>
+                </div> 
+                <br>sec code  <%= random_code.join.each_char.map(&:to_i) %> 
+                 
+             
+              
         
            
               <% if win? %>
               Congratulation you win!
+              <% save_statistic_data %>
               <%delete_current_game_data%>
+
                
                <br>Play again?
                 <form action="/game">
@@ -42,7 +48,7 @@
               </form>
               <% end %>
 
-           
+      
   </center>
     
   </body>

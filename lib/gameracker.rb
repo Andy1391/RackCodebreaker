@@ -1,52 +1,67 @@
 require 'codebreaker'
 require 'erb'
-require 'json'
 
 class Game
 
-  CODE_FILENAME = 'guess_code.json'
+  CODE_FILENAME = 'guess_code'
+  STATISTIC_FILENAME = 'statistic'
   CODE_SIZE = 4
-  RANGE_NUMBER = 1..6
+  ARRAY_SIZE = 0..3
+  RANGE_NUMBERS = 1..6
+  TOKEN_SIZE = 0..50
+  ATTEMPTS = 7    
 
   def self.call(env)
     new(env).response.finish
   end
 
   def initialize(env)      
-    @request = Rack::Request.new(env)    
+    @request = Rack::Request.new(env)
     @current_user = nil    
     @gg = @request.cookies['current_user']
     @guess_code = Array.new
-    @cook = @request.cookies['secret_code']          
+    @cook = @request.cookies['secret_code'] 
+    @attempts = @request.cookies['atempts']                            
   end
 
   def response
     case @request.path 
     when '/' then render_view('index.html.erb')  
-    when '/rules' then render_view('rules.html.erb')    
+    when '/rules' then render_view('rules.html.erb') 
+    when '/update_name'
+      Rack::Response.new do |response|
+        response.set_cookie('user_name', @request.params['user_name'])
+        response.redirect('/')
+      end      
     when '/game' then guess_code
     when '/statistics' then render_view('statistics.html.erb')
-    when '/game' then render_view('game.html.erb')
+    when '/game' then atempts
     else Rack::Response.new('Not Found', 404)
     end
   end
 
-  def new_game
-    @game = Codebreaker::CodebreakerGame.new
-  end
-
   private
 
-  def start
-    save_code_to_file
-    read_code_from_file
+  def user_name
+    @request.cookies['user_name'] || 'Player'
   end
+
+  def start
+    save_code_to_file        
+  end  
 
   def random_code
     @secret_code = @cook.split('').map(&:to_i)
     @secret_code.delete(0)
     @secret_code
-  end   
+  end
+
+  def attempts
+    unless @guess_code.join == random_code.join
+      @attempts -= 1  
+    end
+    @attempts
+  end
 
   def guess_code
     @guess_code << @request.params['user_code'].to_i 
@@ -67,14 +82,24 @@ class Game
     File.delete(CODE_FILENAME)
   end
 
+  def save_statistic_data    
+    f = File.open(STATISTIC_FILENAME, 'a') do |f|
+    f.write("Player: #{@request.cookies['user_name']}  " + "ATTEMPTS: #{@attempts}   <br>" )   
+    end
+  end
+
+  def load_statistic
+    file = File.open(STATISTIC_FILENAME, 'r') { |f| f.read }    
+  end
+
   def win?
     @guess_code.join == random_code.join    
-  end  
+  end
 
   def count_plus
     plus = []
       CODE_SIZE.times do |i| 
-        if @guess_code.join.each_char.to_a[i] == random_code.join.each_char.to_a[i]
+        if @guess_code.join.each_char.map(&:to_i)[i] == random_code.join.each_char.map(&:to_i)[i]
           plus << "+"
         end
       end
@@ -84,12 +109,12 @@ class Game
   def count_minus
     minus = []
       CODE_SIZE.times do |i|
-        if @guess_code.join.each_char.to_a.include?(random_code.join.each_char.to_a[i]) && @guess_code.join.each_char.to_a[i] != random_code.join.each_char.to_a[i]
+        if @guess_code.join.each_char.map(&:to_i).include?(random_code.join.each_char.map(&:to_i)[i]) && (@guess_code.join.each_char.map(&:to_i)[i] != random_code.join.each_char.map(&:to_i)[i])      
           minus << "-"
         end
       end
     minus
-  end
+  end 
 
   def count_plus_and_minus
     count = []
@@ -107,14 +132,10 @@ class Game
   end
 
   def render_view(template)
-    Rack::Response.new(render(template)) do |response|
-      unless @gg
-        token = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
-        string = (0...50).map { token[rand(token.length)] }.join
-        response.set_cookie("current_user", {:value => string, :path => "/", :expires => Time.now+24*60*60})        
-      end
+    Rack::Response.new(render(template)) do |response|       
+        response.set_cookie("atempts", {:value => ATTEMPTS, :path => "/", :expires => Time.now+24*60*60})      
       unless @cook
-        code = Array.new(CODE_SIZE){rand(RANGE_NUMBER)}
+        code = (RANGE_NUMBERS).to_a.sort{ rand() - 0.5 }[ARRAY_SIZE]
         response.set_cookie("secret_code", {:value => code, :path => "/", :expires => Time.now+24*60*60})        
       end         
     end

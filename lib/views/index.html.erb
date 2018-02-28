@@ -2,9 +2,23 @@
 <html>
   <head>
     <title>Codebreaker</title>
-    <link rel="stylesheet" href="/stylesheets/application.css" type="text/css">
-  </head>
-  <body>
+    <link rel="stylesheet" href="/stylesheets/application.css" type="text/css">    
+    <script>
+      function showForm() {
+      document.getElementById("auth").hidden = false;
+      document.getElementById("link").hidden = true;
+      }
+  </script>
+  </head>  
+
+  <body> 
+  <p id="link" onclick="showForm()">Change name</p>
+       
+    <form id="auth"  method="post" action="/update_name" hidden>
+      <input name="user_name" type="text" placeholder="Enter player name">
+      <input type="submit" value="Change!">
+    </form>
+<h3>Your enter as: <%= user_name %></h3>
 
   <p><a href="rules">Rules</a></p>
   <p><a href="statistics">Statistics</a></p> 

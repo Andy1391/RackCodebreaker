@@ -9,10 +9,12 @@ class Game
   ARRAY_SIZE = 0..3
   RANGE_NUMBERS = 1..6
   TOKEN_SIZE = 0..50
-  ATTEMPTS = 7    
+  ATTEMPTS = 7 
+
+  attr_accessor :atempts   
 
   def self.call(env)
-    new(env).response.finish
+    new(env).response.finish    
   end
 
   def initialize(env)      
@@ -20,8 +22,8 @@ class Game
     @current_user = nil    
     @gg = @request.cookies['current_user']
     @guess_code = Array.new
-    @cook = @request.cookies['secret_code'] 
-    @attempts = @request.cookies['atempts']                            
+    @cook = @request.cookies['secret_code']
+    @attempts = @request.cookies['atempts']
   end
 
   def response
@@ -54,13 +56,24 @@ class Game
     @secret_code = @cook.split('').map(&:to_i)
     @secret_code.delete(0)
     @secret_code
-  end
+  end  
 
   def attempts
-    unless @guess_code.join == random_code.join
-      @attempts -= 1  
-    end
-    @attempts
+    Rack::Response.new do |response|
+        b = @attempts.to_i
+        response.set_cookie("atempts", { value: b - 1})
+        response.redirect('/')
+    end      
+
+
+
+    #   Rack::Response.new do |response| 
+    #     @attempts = @request.cookies['atempts'].to_i       
+    #     unless @guess_code.join == random_code.join
+    #       b = @attempts - 1
+    #     end      
+    #     response.set_cookie("atempts", {:value => b})
+    # end
   end
 
   def guess_code

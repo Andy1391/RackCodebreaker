@@ -14,18 +14,28 @@
         
     <p>Enter guess code(4 digits from 1 to 6):</p>
     <div class="start">
-            <form method="post"  >
-              <input name="user_code"  type="numbers" required pattern="[1-6]{4}" placeholder = "* * * *"/>
+            <form method="post" action="/attempt">
+              <input name="user_code" type="numbers" required pattern="[1-6]{4}" placeholder = "* * * *"  />
               <input type="submit" value="Enter"/>
             </form>
     </div> 
     ___________________________________
       
         <br> user code is: <%= @guess_code %>       
-   <h3><p text align="left">attempts  <%= @attempts %></p></h3>
-                test  
    
-          
+                  <h3><p>attempts  <%= @attempts %></p></h3>                   
+                         
+                    
+                      <h3>Hints: <%= @hints%></h3>
+                      <br>[<%= @current_hint%>]
+
+                      <form method="post">
+                        <%if @hints.to_i.positive? %>                          
+                          <input  type="submit" value="Hint" formaction="/take_hint"/>
+                        <% else %>
+                          <input type="submit" value="Hint" disabled/>
+                        <% end %>
+                      </form>          
         
                 <div class="user_code">  <%= read_code_from_file %>
                 </div> 
@@ -36,9 +46,9 @@
         
            
               <% if win? %>
-              Congratulation you win!
+              Congratulation you win!            
               <% save_statistic_data %>
-              <%delete_current_game_data%>
+              <% delete_current_game_data %>
 
                
                <br>Play again?
@@ -49,7 +59,16 @@
                <button >No</button>
               </form>
               <% end %>
-
+              <% if lose %>
+                </br>You lose :( Try again ?
+                <% delete_current_game_data %>
+                <form action="/game">
+               <button>Yes</button>
+                </form>
+               <form action="/">
+               <button >No</button>
+              </form>
+              <%end%>
       
   </center>
     

@@ -114,7 +114,8 @@ class Game
   end
 
   def lose
-    @request.cookies['atempts'].to_i.positive?   
+    unless @request.cookies['atempts'].to_i.positive?
+    end   
   end
 
   def count_plus

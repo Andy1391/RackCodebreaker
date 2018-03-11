@@ -8,7 +8,7 @@ class Game
   CODE_SIZE = 4
   ARRAY_SIZE = 0..3
   RANGE_NUMBERS = 1..6  
-  ATTEMPTS = 2
+  ATTEMPTS = 3
   HINTS = 2   
 
   def self.call(env)
@@ -21,22 +21,22 @@ class Game
     @cook = @request.cookies['secret_code']
     @attempts = @request.cookies['atempts']
     @hints = @request.cookies['hints']
-    @current_hint = @request.cookies['current_hint']           
+    @current_hint = @request.cookies['current_hint']               
  end
 
   def response
     case @request.path 
-    when '/' then render_view('index.html.erb')  
+    when '/' then render_view('index.html.erb')    
     when '/rules' then render_view('rules.html.erb')
-    when '/statistics' then render_view('statistics.html.erb') 
+    when '/statistics' then render_view('statistics.html.erb')    
     when '/update_name' then update_name      
     when '/take_hint' then take_hint
-    when '/set_attempts' then set_attempts
+    when '/start_game' then start_game
     when '/attempt' then attempt     
-    when '/game' then guess_code                      
+    when '/game' then guess_code                     
     else Rack::Response.new('Not Found', 404)
     end
-  end
+  end  
 
   def user_name
     @request.cookies['user_name'] || 'Player'
@@ -48,8 +48,8 @@ class Game
     @secret_code
   end
 
-  def guess_code
-    @guess_code << @request.params['user_code'].to_i 
+  def guess_code    
+    @guess_code << @request.params['user_code'].to_i    
     return render_view('game.html.erb')
   end  
 
@@ -60,27 +60,29 @@ class Game
     end
   end
 
-  def set_attempts
+  def start_game
     Rack::Response.new do |response|
       response.set_cookie('atempts', {:value => ATTEMPTS, :path => "/", :expires => Time.now+24*60*60})
+      response.set_cookie('hints', {:value => HINTS, :path => "/", :expires => Time.now+24*60*60})
       response.redirect('/game')
     end
   end
 
-  def attempt
-      guess_code    
-    Rack::Response.new do |response|
-      a = @attempts.to_i - 1      
-      response.set_cookie('atempts', {:value => a, :path => "/", :expires => Time.now+24*60*60})
+  def attempt      
+    Rack::Response.new do |response|     
+      a = @attempts.to_i - 1          
+      response.set_cookie('atempts', {:value => a, :path => "/", :expires => Time.now+24*60*60})            
       response.redirect('/game')
-    end
+    end    
   end   
 
   def take_hint
-    Rack::Response.new do |response|      
+    Rack::Response.new do |response|
       random_hint = rand(CODE_SIZE)
-      hint = random_code.shuffle                    
-      response.set_cookie('current_hint', :value => hint, :path => "/" )            
+      hint = random_code[random_hint]                         
+      response.set_cookie('current_hint', :value => hint, :path => "/" )
+      a = @hints.to_i - 1
+      response.set_cookie('hints', {:value => a, :path => "/"})            
       response.redirect('/game')
     end                      
   end  
@@ -114,8 +116,7 @@ class Game
   end
 
   def lose
-    unless @request.cookies['atempts'].to_i.positive?
-    end   
+     @attempts.to_i.zero?      
   end
 
   def count_plus
@@ -128,8 +129,9 @@ class Game
     plus
   end
 
-  def start
-    save_code_to_file            
+  def data_output
+    save_code_to_file
+    read_code_from_file            
   end  
 
   def count_minus
@@ -158,11 +160,10 @@ class Game
   end
 
   def render_view(template)
-    Rack::Response.new(render(template)) do |response|                  
-        response.set_cookie("hints", {:value => HINTS, :path => "/", :expires => Time.now+24*60*60}) 
+    Rack::Response.new(render(template)) do |response|       
       unless @cook
         code = (RANGE_NUMBERS).to_a.sort{ rand() - 0.5 }[ARRAY_SIZE]
-        response.set_cookie("secret_code", {:value => code, :path => "/", :expires => Time.now+24*60*60})        
+        response.set_cookie('secret_code', {:value => code, :path => "/", :expires => Time.now+24*60*60})        
       end         
     end
   end

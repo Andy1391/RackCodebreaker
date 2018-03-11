@@ -64,6 +64,7 @@ class Game
     Rack::Response.new do |response|
       response.set_cookie('atempts', {:value => ATTEMPTS, :path => "/", :expires => Time.now+24*60*60})
       response.set_cookie('hints', {:value => HINTS, :path => "/", :expires => Time.now+24*60*60})
+      response.delete_cookie('current_hint')
       response.redirect('/game')
     end
   end

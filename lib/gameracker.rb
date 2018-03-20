@@ -78,6 +78,10 @@ class Game
       response.set_cookie('atempts', {:value => a, :path => "/", :expires => Time.now+24*60*60})            
       response.redirect("/game?user_code=#{@request.params['user_code']}")
     end    
+  end
+
+  def hint
+    @hints.to_i.zero?
   end   
 
   def take_hint

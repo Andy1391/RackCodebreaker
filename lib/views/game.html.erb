@@ -27,7 +27,7 @@
       <br>[<%= @current_hint%>]
 
       <form method="post"  >
-        <% unless lose || win? %>                          
+        <% unless lose || win? || hint %>                          
           <input  type="submit" value="Hint" formaction="/take_hint"/>
         <% else %>
           <input type="submit" value="Hint" disabled/>

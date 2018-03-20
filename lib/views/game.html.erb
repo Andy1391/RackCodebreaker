@@ -34,9 +34,7 @@
         <% end %>
       </form>          
             
-      <div class="user_code">  <%= data_output %> </div>                
-      <br>sec code  <%= random_code.join.each_char.map(&:to_i) %> 
-      <br>sc <%= @guess_code.join.each_char.map(&:to_i) %>                 
+      <div class="user_code">  <%= data_output %> </div>  
                               
       <% if win? %>
           Congratulation you win!

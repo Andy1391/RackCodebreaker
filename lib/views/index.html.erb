@@ -9,34 +9,27 @@
       document.getElementById("link").hidden = true;
       }
   </script>
-  </head>  
-
+  </head>
   <body> 
-  <p id="link" onclick="showForm()">Change name</p>
-     
+    <p id="link" onclick="showForm()">Change name</p>       
     <form id="auth"  method="post" action="/update_name" hidden>
       <input name="user_name" type="text" placeholder="Enter player name">
       <input type="submit" value="Change!">
     </form>
-  <h3>You enter as: <%= user_name %></h3>
-  
-  <p><a href="rules">Rules</a></p>
-  <p><a href="statistics">Statistics</a></p> 
-  <%delete_current_game_data%>
-  
-   
-   <h1><p align="center">Codebreaker</p></h1>
-  
-       <div class="start">
-           
-       <center>
+
+    <h3>You enter as: <%= user_name %></h3>
+    
+    <p><a href="rules">Rules</a></p>
+    <p><a href="statistics">Statistics</a></p> 
+    <%delete_current_game_data%>
+     
+     <h1><p align="center">Codebreaker</p></h1>                 
+      <center>
+        <div class="start"> 
            <form class="New Game" method="post" action="/new_game">
-             <input type="submit" value="New Game">
-          </form>
+              <input type="submit" value="New Game">
+            </form>
         </div> 
       </center>
-
-
-
   </body>
 </html>

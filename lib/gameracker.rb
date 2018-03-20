@@ -17,7 +17,7 @@ class Game
 
   def initialize(env)      
     @request = Rack::Request.new(env)
-    @guess_code = Array.new
+    @guess_code = Array.new    
     @user_code = @request.params['user_code']
     @cook = @request.cookies['secret_code']
     @attempts = @request.cookies['atempts']
@@ -35,26 +35,25 @@ class Game
     when '/new_game' then new_game
     when '/attempt' then attempt        
     when '/game' then guess_code
-    when '/clear_statistic' then clear_statistic
-                                                                                                        
+    when '/clear_statistic' then clear_statistic                                                                                                        
     else Rack::Response.new('Not Found', 404)
     end
   end  
 
   def user_name
     @request.cookies['user_name'] || 'Player'
-  end   
+  end  
 
-  def random_code
+  def random_code    
     @secret_code = @cook.split('').map(&:to_i)
     @secret_code.delete(0)
     @secret_code
   end
 
   def guess_code    
-    @guess_code << @request.params['user_code'].to_i    
+    @guess_code << @request.params['user_code'].to_i          
     return render_view('game.html.erb')
-  end  
+  end
 
   def update_name
     Rack::Response.new do |response|
@@ -93,7 +92,9 @@ class Game
       response.set_cookie('hints', {:value => a, :path => "/"})            
       response.redirect('/game')
     end                      
-  end  
+  end
+
+  private  
 
   def save_code_to_file    
     f = File.open(CODE_FILENAME, 'a') do |f|
@@ -122,7 +123,15 @@ class Game
   end
 
   def load_statistic
-    file = File.open(STATISTIC_FILENAME, 'r') { |f| f.read }    
+    File.open(STATISTIC_FILENAME, 'r') { |f| f.read }    
+  end
+
+  def guess_code_to_a
+    @guess_code.join.each_char.map(&:to_i)  
+  end
+
+  def random_code_to_a
+    random_code.join.each_char.map(&:to_i)
   end
 
   def win?
@@ -135,13 +144,13 @@ class Game
   end
 
   def lose
-    @attempts.to_i.zero? && @secret_code != @guess_code.join.each_char.map(&:to_i)           
+    @attempts.to_i.zero? && @secret_code != guess_code_to_a           
   end
 
   def count_plus
     plus = []
       CODE_SIZE.times do |i| 
-        if @guess_code.join.each_char.map(&:to_i)[i] == random_code.join.each_char.map(&:to_i)[i]
+        if guess_code_to_a[i] == random_code_to_a[i]
           plus << "+"
         end
       end
@@ -156,7 +165,7 @@ class Game
   def count_minus
     minus = []
       CODE_SIZE.times do |i|
-        if @guess_code.join.each_char.map(&:to_i).include?(random_code.join.each_char.map(&:to_i)[i]) && (@guess_code.join.each_char.map(&:to_i)[i] != random_code.join.each_char.map(&:to_i)[i])      
+        if guess_code_to_a.include?(random_code_to_a[i]) && (guess_code_to_a[i] != random_code_to_a[i])      
           minus << "-"
         end
       end

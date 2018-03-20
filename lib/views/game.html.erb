@@ -7,70 +7,59 @@
   </head>
   <body>
  
-  <p><a href="/">Home page</a></p>   
-  <center>
-       
-    <p>Enter guess code(4 digits from 1 to 6):</p>
-    <div class="start">
-            <form method="post" >
-              <input name="user_code" type="numbers"  required pattern="[1-6]{4}" placeholder = "*   *   *   *"  />               
-              <% unless lose %>              
-              <input type="submit" value="Enter"/>
-              <% else %>              
-              <input type="submit" value="Enter" disabled /> 
-              <% end %>
-            </form>
-    </div> 
-    ___________________________
-      
-        <br> user code is: <%= @guess_code %>       
+    <p><a href="/">Home page</a></p>   
+    <center>
    
-                  <h3><p>attempts  <%= @attempts %></p></h3>          
-                         
-                    
-                      <h3>Hints: <%= @hints%></h3>
-                      <br>[<%= @current_hint%>]
+      <p>Enter guess code(4 digits from 1 to 6):</p>
+      <div class="start">
+        <form method="post" action="/attempt">
+          <input name="user_code" type="numbers"  required pattern="[1-6]{4}" placeholder = "*   *   *   *"  />               
+          <% unless lose || win? %>              
+            <input type="submit" value="Enter"/>
+          <% else %>              
+            <input type="submit" value="Enter" disabled /> 
+          <% end %>
+        </form>
+      </div>   
+       
+      <h3><br> Attempts: <%= @attempts %></p></h3>                   
+      <h3>Hints: <%= @hints%></h3>
+      <br>[<%= @current_hint%>]
 
-                      <form method="post"  >
-                        <%if @hints.to_i.positive? %>                          
-                          <input  type="submit" value="Hint" formaction="/take_hint"/>
-                        <% else %>
-                          <input type="submit" value="Hint" disabled/>
-                        <% end %>
-                      </form>          
-        
-                <div class="user_code">  <%= data_output %>
-                </div> 
-                <br>sec code  <%= random_code.join.each_char.map(&:to_i) %>   
-              
-        
-           
-              <% if win? %>
-              Congratulation you win!            
-              <% save_statistic_data %>
-              <% delete_current_game_data %>
+      <form method="post"  >
+        <% unless lose || win? %>                          
+          <input  type="submit" value="Hint" formaction="/take_hint"/>
+        <% else %>
+          <input type="submit" value="Hint" disabled/>
+        <% end %>
+      </form>          
+            
+      <div class="user_code">  <%= data_output %> </div>                
+      <br>sec code  <%= random_code.join.each_char.map(&:to_i) %> 
+      <br>sc <%= @guess_code.join.each_char.map(&:to_i) %>                 
+                              
+      <% if win? %>
+          Congratulation you win!
+        <br>Play again?            
+        <% win %>   
+        <form action="/new_game">
+          <button>Yes</button>
+        </form>
+        <form action="/">
+          <button >No</button>
+        </form>
+      <% end %>
 
-               
-               <br>Play again?
-                <form action="/start_game">
-               <button>Yes</button>
-                </form>
-               <form action="/">
-               <button >No</button>
-              </form>
-              <% end %>
-              <% if lose %>
-                </br>You lose :( Try again ?
-                
-                <form action="/game">
-               <button>Yes</button>
-                </form>
-               <form action="/">
-               <button >No</button>
-              </form>
-              <%end%>
-      
-  </center>
-    
+      <% if lose %>
+        </br>You lose :( Try again ?
+        <% delete_current_game_data %>
+        <form action="/new_game">
+          <button>Yes</button>
+        </form>
+        <form action="/">
+          <button >No</button>
+        </form>      
+      <%end%>      
+    </center>    
   </body>
 </html>

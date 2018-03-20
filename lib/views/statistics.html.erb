@@ -5,12 +5,15 @@
     <link rel="stylesheet" href="/stylesheets/application.css" type="text/css">
   </head>
   <body>
-  <p><a href="/">Home page</a></p>
-
-  	<div class="main">   
-		<h2>Let's play and be better</h2>
-	</div>	
-      <%=load_statistic%>
+    <p><a href="/">Home page</a></p>
+    <h2><p align="center">Let's play and be better</p></h2>
+    
+    <div class="statistic">      
+      <%=load_statistic%>   
+        <form action="/clear_statistic">
+          <button>Clear statitic</button>
+        </form>      
+    </div>     
   </body>
 </html>
 

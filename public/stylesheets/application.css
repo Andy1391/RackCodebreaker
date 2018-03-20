@@ -4,21 +4,28 @@ body {
 }
 
 .user_code {
-	font-size: 16px;
-	font-weight: bold;	
+  font-size: 16px;
+  font-weight: bold;  
 }
 
 .hint {
-	margin: 0;
-	padding: 0;	
+  margin: 0;
+  padding: 0; 
 }
 
+.statistic {
+  text-align: center;
+  font-size: 14px;
+  font-family: Courier New;
+  font-weight: bold;      
+}
+  
 a {
   color: grey;
  }
 
 p {
-margin: 0;
-padding: 0;
+  margin: 0;
+  padding: 0;
 }
 

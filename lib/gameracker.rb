@@ -8,7 +8,7 @@ class Game
   CODE_SIZE = 4
   ARRAY_SIZE = 0..3
   RANGE_NUMBERS = 1..6  
-  ATTEMPTS = 3
+  ATTEMPTS = 7
   HINTS = 2   
 
   def self.call(env)
@@ -18,6 +18,7 @@ class Game
   def initialize(env)      
     @request = Rack::Request.new(env)
     @guess_code = Array.new
+    @user_code = @request.params['user_code']
     @cook = @request.cookies['secret_code']
     @attempts = @request.cookies['atempts']
     @hints = @request.cookies['hints']
@@ -31,9 +32,11 @@ class Game
     when '/statistics' then render_view('statistics.html.erb')    
     when '/update_name' then update_name      
     when '/take_hint' then take_hint
-    when '/start_game' then start_game
-    when '/attempt' then attempt     
-    when '/game' then guess_code                     
+    when '/new_game' then new_game
+    when '/attempt' then attempt        
+    when '/game' then guess_code
+    when '/clear_statistic' then clear_statistic
+                                                                                                        
     else Rack::Response.new('Not Found', 404)
     end
   end  
@@ -58,22 +61,22 @@ class Game
       response.set_cookie('user_name', @request.params['user_name'])      
       response.redirect('/')
     end
-  end
+  end  
 
-  def start_game
+  def new_game
     Rack::Response.new do |response|
       response.set_cookie('atempts', {:value => ATTEMPTS, :path => "/", :expires => Time.now+24*60*60})
       response.set_cookie('hints', {:value => HINTS, :path => "/", :expires => Time.now+24*60*60})
       response.delete_cookie('current_hint')
       response.redirect('/game')
-    end
+    end      
   end
 
   def attempt      
     Rack::Response.new do |response|     
       a = @attempts.to_i - 1          
       response.set_cookie('atempts', {:value => a, :path => "/", :expires => Time.now+24*60*60})            
-      response.redirect('/game')
+      response.redirect("/game?user_code=#{@request.params['user_code']}")
     end    
   end   
 
@@ -90,22 +93,28 @@ class Game
 
   def save_code_to_file    
     f = File.open(CODE_FILENAME, 'a') do |f|
-    f.write("#{@request.params['user_code']}" + "#{count_plus_and_minus} <br>" )   
+    f.write("#{@user_code}" + "#{count_plus_and_minus} <br>" )   
     end
   end
 
   def read_code_from_file    
-    file = File.open(CODE_FILENAME, 'r') { |f| f.read } 
+    File.open(CODE_FILENAME, 'r') { |f| f.read } 
   end
 
-  def delete_code_file
-    File.delete(CODE_FILENAME)
+  def delete_current_game_data
+    File.open(CODE_FILENAME, 'w') {|file| file.truncate(0) }
+    @cook = nil 
   end
 
-  def save_statistic_data    
+  def save_statistic    
     f = File.open(STATISTIC_FILENAME, 'a') do |f|
-    f.write("Player: #{@request.cookies['user_name']}  " + "ATTEMPTS: #{@attempts}   <br>" )   
+    f.write("Player: #{@request.cookies['user_name']}  " + "HINTS: #{@hints}  " + "ATTEMPTS: #{@attempts}   <br>" )   
     end
+  end
+
+  def clear_statistic
+    File.open(STATISTIC_FILENAME, 'w') {|file| file.truncate(0) }
+    return render_view('statistics.html.erb')
   end
 
   def load_statistic
@@ -116,8 +125,13 @@ class Game
     @guess_code.join == random_code.join    
   end
 
+  def win
+    save_statistic
+    delete_current_game_data
+  end
+
   def lose
-     @attempts.to_i.zero?      
+    @attempts.to_i.zero? && @secret_code != @guess_code.join.each_char.map(&:to_i)           
   end
 
   def count_plus
@@ -149,16 +163,7 @@ class Game
     count = []
     count << count_plus.concat(count_minus)
     count.join
-  end
-
-  def delete_game_data    
-    @cook = nil         
-  end
-
-  def delete_current_game_data
-    delete_code_file
-    delete_game_data    
-  end
+  end  
 
   def render_view(template)
     Rack::Response.new(render(template)) do |response|       
